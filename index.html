@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Markdown Viewer</title>
     <script src="src/markdownparser.js"></script>
-
-
+    <link rel="stylesheet" href="src/katex/katex.min.css">
+    <script src="src/katex/katex.min.js"></script>
+    <script src="src/katex/contrib/auto-render.min.js"></script>
 
     <!-- minimal styles-->
     <style>
@@ -39,8 +40,6 @@
 </head>
 <body>
 
-
-
     <!-- edit this part as you like -->
     <div id="header">
         <nav>
@@ -52,19 +51,6 @@
     <div id="footer">
         <p>© 2024 Your Website</p>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     <!-- usually you dont have to touch this part -->
     <script>
@@ -80,6 +66,7 @@
                         const file = mdFiles.find(f => f.filename === fileName);
                         document.title = file ? file.displayName : fileName;
                         contentDiv.innerHTML = marked.parse(text);
+                        renderMathInContent();
                         updateInternalLinks();
                         addIconsToLinks();
                     })
@@ -169,6 +156,17 @@
                     .catch(error => {
                         console.error('Error loading file list:', error);
                     });
+            };
+
+            const renderMathInContent = () => {
+                renderMathInElement(contentDiv, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
             };
 
             window.addEventListener('hashchange', handleHashChange);
