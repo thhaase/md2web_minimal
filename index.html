@@ -90,14 +90,14 @@
             };
 
             const loadHeaderAndFooter = () => {
-                fetch('_header.html')
+                fetch('header.html')
                     .then(response => response.text())
                     .then(text => {
                         headerDiv.innerHTML = text;
                         updateHeaderLinks();
                     });
 
-                fetch('_footer.html')
+                fetch('footer.html')
                     .then(response => response.text())
                     .then(text => {
                         footerDiv.innerHTML = text;
