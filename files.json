@@ -1,0 +1,22 @@
+[
+    {
+        "filename": "file1.md",
+        "displayName": "Document 1",
+        "date": "2024-01-01"
+    },
+    {
+        "filename": "file2.md",
+        "displayName": "Document 2",
+        "date": "2024-02-15"
+    },
+    {
+        "filename": "file3.md",
+        "displayName": "Document 3",
+        "date": "2024-03-30"
+    },
+    {
+        "filename": "example.pdf",
+        "displayName": "Example PDF",
+        "date": "2024-05-05"
+    }
+]

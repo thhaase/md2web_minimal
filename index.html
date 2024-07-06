@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Viewer</title>
+    <script src="src/markdownparser.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #content {
+            margin: 20px;
+        }
+        nav {
+            margin: 20px;
+        }
+        a {
+            text-decoration: none;
+            color: blue;
+        }
+        .icon {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+            margin-right: 0px;
+            margin-bottom: 4px;
+        }
+        .date {
+            font-size: 0.8em;
+            color: gray;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <div id="content"></div>
+    <div id="footer"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const contentDiv = document.getElementById('content');
+            const headerDiv = document.getElementById('header');
+            const footerDiv = document.getElementById('footer');
+
+            let mdFiles = [];
+
+            const fetchAndRenderMarkdown = (fileName) => {
+                fetch(fileName)
+                    .then(response => response.text())
+                    .then(text => {
+                        const file = mdFiles.find(f => f.filename === fileName);
+                        document.title = file ? file.displayName : fileName;
+                        contentDiv.innerHTML = marked.parse(text);
+                        updateInternalLinks();
+                        addIconsToLinks();
+                    })
+                    .catch(error => {
+                        contentDiv.innerHTML = `<p>Error loading ${fileName}: ${error.message}</p>`;
+                    });
+            };
+
+            const updateInternalLinks = () => {
+                const links = contentDiv.querySelectorAll('a[href$=".md"], a[href$=".pdf"], a[href^="#"]');
+                links.forEach(link => {
+                    link.addEventListener('click', (event) => {
+                        const href = link.getAttribute('href').replace('./', '');
+                        if (href.endsWith('.pdf')) {
+                            link.setAttribute('download', '');
+                        } else if (href.endsWith('.md')) {
+                            event.preventDefault();
+                            window.location.hash = `#${href}`;
+                        }
+                    });
+                });
+            };
+
+            const addIconsToLinks = () => {
+                const links = contentDiv.querySelectorAll('a[href$=".md"], a[href$=".pdf"]');
+                links.forEach(link => {
+                    const href = link.getAttribute('href');
+                    const iconName = getIconByExtension(href);
+                    const iconImg = document.createElement('img');
+                    iconImg.src = `src/icons/${iconName}.svg`;
+                    iconImg.className = 'icon';
+                    iconImg.alt = `${iconName} icon`;
+                    link.prepend(iconImg);
+                });
+            };
+
+            const loadHeaderAndFooter = () => {
+                fetch('src/_header.html')
+                    .then(response => response.text())
+                    .then(text => {
+                        headerDiv.innerHTML = text;
+                        updateHeaderLinks();
+                    });
+
+                fetch('src/_footer.html')
+                    .then(response => response.text())
+                    .then(text => {
+                        footerDiv.innerHTML = text;
+                    });
+            };
+
+            const updateHeaderLinks = () => {
+                const headerLinks = headerDiv.querySelectorAll('a[href$=".md"], a[href$=".pdf"]');
+                headerLinks.forEach(link => {
+                    link.addEventListener('click', (event) => {
+                        const href = link.getAttribute('href').replace('./', '');
+                        if (href.endsWith('.pdf')) {
+                            link.setAttribute('download', '');
+                        } else {
+                            event.preventDefault();
+                            window.location.hash = `#${href}`;
+                        }
+                    });
+                });
+            };
+
+            const handleHashChange = () => {
+                const hash = window.location.hash.substring(1);
+                if (hash) {
+                    fetchAndRenderMarkdown(hash);
+                } else {
+                    document.title = 'Markdown Viewer';
+                    contentDiv.innerHTML = '<ul id="file-list"></ul>';
+                    const fileList = document.getElementById('file-list');
+                    mdFiles.forEach(file => {
+                        const listItem = document.createElement('li');
+                        const anchor = document.createElement('a');
+                        anchor.href = file.filename;
+                        if (file.filename.endsWith('.pdf')) {
+                            anchor.setAttribute('download', '');
+                        } else {
+                            anchor.addEventListener('click', (event) => {
+                                event.preventDefault();
+                                window.location.hash = `#${file.filename}`;
+                            });
+                        }
+                        anchor.innerHTML = `
+                            <img src="src/icons/${getIconByExtension(file.filename)}.svg" class="icon" alt="${file.displayName} icon">
+                            ${file.displayName}
+                            <span class="date">${file.date}</span>
+                        `;
+                        listItem.appendChild(anchor);
+                        fileList.appendChild(listItem);
+                    });
+                }
+            };
+
+            const getIconByExtension = (filename) => {
+                const extension = filename.split('.').pop();
+                switch (extension) {
+                    case 'pdf':
+                        return 'pdf';
+                    case 'md':
+                        return 'markdown';
+                    default:
+                        return 'file';
+                }
+            };
+
+            const loadFileList = () => {
+                fetch('files.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        mdFiles = data;
+                        handleHashChange();
+                    })
+                    .catch(error => {
+                        console.error('Error loading file list:', error);
+                    });
+            };
+
+            window.addEventListener('hashchange', handleHashChange);
+
+            loadHeaderAndFooter();
+            loadFileList();
+        });
+    </script>
+</body>
+</html>
