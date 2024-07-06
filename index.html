@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Markdown Viewer</title>
     <script src="src/markdownparser.js"></script>
+
+
+
+    <!-- minimal styles-->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -34,15 +38,38 @@
     </style>
 </head>
 <body>
-    <div id="header"></div>
-    <div id="content"></div>
-    <div id="footer"></div>
 
+
+
+    <!-- edit this part as you like -->
+    <div id="header">
+        <nav>
+            <a href="#" id="home-link">Home</a>
+            <a href="about.md" id="about-link">About</a>
+        </nav>
+    </div>
+    <div id="content"></div>
+    <div id="footer">
+        <p>© 2024 Your Website</p>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- usually you dont have to touch this part -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const contentDiv = document.getElementById('content');
-            const headerDiv = document.getElementById('header');
-            const footerDiv = document.getElementById('footer');
 
             let mdFiles = [];
 
@@ -86,36 +113,6 @@
                     iconImg.className = 'icon';
                     iconImg.alt = `${iconName} icon`;
                     link.prepend(iconImg);
-                });
-            };
-
-            const loadHeaderAndFooter = () => {
-                fetch('header.html')
-                    .then(response => response.text())
-                    .then(text => {
-                        headerDiv.innerHTML = text;
-                        updateHeaderLinks();
-                    });
-
-                fetch('footer.html')
-                    .then(response => response.text())
-                    .then(text => {
-                        footerDiv.innerHTML = text;
-                    });
-            };
-
-            const updateHeaderLinks = () => {
-                const headerLinks = headerDiv.querySelectorAll('a[href$=".md"], a[href$=".pdf"]');
-                headerLinks.forEach(link => {
-                    link.addEventListener('click', (event) => {
-                        const href = link.getAttribute('href').replace('./', '');
-                        if (href.endsWith('.pdf')) {
-                            link.setAttribute('download', '');
-                        } else {
-                            event.preventDefault();
-                            window.location.hash = `#${href}`;
-                        }
-                    });
                 });
             };
 
@@ -176,7 +173,17 @@
 
             window.addEventListener('hashchange', handleHashChange);
 
-            loadHeaderAndFooter();
+            // Update header links to handle navigation
+            document.getElementById('home-link').addEventListener('click', (event) => {
+                event.preventDefault();
+                window.location.hash = '';
+            });
+
+            document.getElementById('about-link').addEventListener('click', (event) => {
+                event.preventDefault();
+                window.location.hash = '#about.md';
+            });
+
             loadFileList();
         });
     </script>
